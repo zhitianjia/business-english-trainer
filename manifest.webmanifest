@@ -1,0 +1,19 @@
+{
+  "name": "商务英语学习",
+  "short_name": "商务英语",
+  "description": "外贸与职场商务英语学习：词汇卡、情景对话、听力训练、小测验、角色扮演",
+  "start_url": "index.html",
+  "scope": ".",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f4f6fb",
+  "theme_color": "#2563eb",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

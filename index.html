@@ -1,0 +1,1230 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>商务英语学习网页端 · Business English Trainer</title>
+<meta name="theme-color" content="#2563eb">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon.svg">
+<style>
+  :root{
+    --blue:#1e5fd8; --blue-dark:#16489f; --blue-light:#e8f0fe;
+    --ink:#1f2937; --muted:#6b7280; --line:#e3e8f0;
+    --bg:#f5f8ff; --card:#ffffff; --ok:#1aa86b; --bad:#e2483d; --warn:#e9a000;
+    --shadow:0 6px 20px rgba(30,95,216,.10);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif;
+       background:var(--bg);color:var(--ink);line-height:1.6;padding-bottom:80px}
+  .topbar{background:linear-gradient(135deg,var(--blue),var(--blue-dark));color:#fff;
+          padding:18px 20px;position:sticky;top:0;z-index:50;box-shadow:var(--shadow);display:flex;align-items:center;justify-content:space-between}
+  .topbar h1{font-size:19px;font-weight:700;display:flex;align-items:center;gap:8px}
+  .topbar .sub{font-size:12px;opacity:.85;margin-top:2px}
+  .gear{background:rgba(255,255,255,.18);border:none;color:#fff;width:38px;height:38px;border-radius:10px;font-size:18px;cursor:pointer}
+  .gear:hover{background:rgba(255,255,255,.3)}
+  nav{display:flex;gap:6px;overflow-x:auto;padding:10px 16px;background:#fff;border-bottom:1px solid var(--line);position:sticky;top:64px;z-index:40}
+  nav button{flex:0 0 auto;border:1px solid var(--line);background:#fff;color:var(--blue);
+             padding:8px 14px;border-radius:20px;font-size:13px;cursor:pointer;font-weight:600;transition:.2s}
+  nav button.active{background:var(--blue);color:#fff;border-color:var(--blue)}
+  nav button .badge{background:var(--bad);color:#fff;border-radius:10px;padding:0 6px;font-size:11px;margin-left:4px}
+  .wrap{max-width:960px;margin:0 auto;padding:18px 16px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;box-shadow:var(--shadow);margin-bottom:16px}
+  .card h2{font-size:16px;color:var(--blue-dark);margin-bottom:12px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .hidden{display:none!important}
+  /* progress */
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+  .stat{background:var(--blue-light);border-radius:12px;padding:14px;text-align:center}
+  .stat .num{font-size:24px;font-weight:800;color:var(--blue-dark)}
+  .stat .lbl{font-size:12px;color:var(--muted);margin-top:2px}
+  .checkin{margin-top:14px;text-align:center}
+  .btn{border:none;background:var(--blue);color:#fff;padding:10px 18px;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;transition:.2s}
+  .btn:hover{background:var(--blue-dark)}
+  .btn.ghost{background:#fff;color:var(--blue);border:1px solid var(--blue)}
+  .btn.sm{padding:6px 12px;font-size:13px;border-radius:8px}
+  .btn.ok{background:var(--ok)} .btn.bad{background:var(--bad)}
+  /* tabs */
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+  .chip{border:1px solid var(--line);background:#fff;color:var(--muted);padding:7px 13px;border-radius:18px;font-size:13px;cursor:pointer}
+  .chip.active{background:var(--blue);color:#fff;border-color:var(--blue)}
+  /* vocab cards */
+  .deck{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px}
+  .flip{perspective:1000px;height:210px}
+  .flip-inner{position:relative;width:100%;height:100%;transition:transform .5s;transform-style:preserve-3d;cursor:pointer}
+  .flip.flipped .flip-inner{transform:rotateY(180deg)}
+  .face{position:absolute;inset:0;backface-visibility:hidden;background:#fff;border:1px solid var(--line);border-radius:14px;
+        padding:16px;display:flex;flex-direction:column;justify-content:center;box-shadow:var(--shadow)}
+  .face.back{transform:rotateY(180deg);background:var(--blue-light)}
+  .face .en{font-size:20px;font-weight:700;color:var(--blue-dark)}
+  .face .ph{font-size:13px;color:var(--muted);margin:4px 0 8px}
+  .face .zh{font-size:15px;font-weight:600}
+  .face .ex{font-size:12.5px;color:var(--muted);margin-top:6px}
+  .face .tag{position:absolute;top:10px;right:12px;font-size:11px;padding:2px 8px;border-radius:10px}
+  .tag.m{background:#d8f5e6;color:var(--ok)} .tag.n{background:#fde2df;color:var(--bad)}
+  .star{position:absolute;top:8px;left:10px;border:none;background:transparent;font-size:18px;cursor:pointer;color:#f0b400;line-height:1}
+  .en-row{display:flex;align-items:center;justify-content:center;gap:8px}
+  .face .speak{display:inline-flex;align-items:center;gap:4px;cursor:pointer;border:1px solid var(--blue);background:#fff;color:var(--blue);border-radius:8px;padding:4px 9px;font-size:13px;margin-top:8px}
+  .face .speak:active{transform:scale(.95)}
+  .card-actions{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+  /* dialogue */
+  .scene-tabs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+  .scene{border:1px solid var(--line);background:#fff;padding:7px 13px;border-radius:18px;font-size:13px;cursor:pointer;color:var(--muted)}
+  .scene.active{background:var(--blue);color:#fff;border-color:var(--blue)}
+  .line{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border-radius:10px;margin-bottom:8px;background:#fff;border:1px solid var(--line)}
+  .line .who{font-size:12px;font-weight:700;color:var(--blue);min-width:46px}
+  .line .txt{flex:1}
+  .line .en{font-size:14.5px}
+  .line .zh{font-size:13px;color:var(--muted);margin-top:3px;display:none}
+  .line.show .zh{display:block}
+  .line .speak{flex:0 0 auto;cursor:pointer;border:none;background:var(--blue-light);color:var(--blue);border-radius:8px;padding:4px 8px;font-size:13px}
+  /* listening */
+  .fill-q{margin-bottom:16px;padding:14px;background:#fff;border:1px solid var(--line);border-radius:12px}
+  .fill-q .sent{font-size:15px;margin-bottom:8px}
+  .fill-q input{border:1px solid var(--line);border-radius:8px;padding:7px 10px;font-size:14px;width:140px}
+  .fill-q .fb{font-size:13px;margin-top:6px}
+  .fb.ok{color:var(--ok)} .fb.bad{color:var(--bad)}
+  /* quiz */
+  .q{padding:14px;background:#fff;border:1px solid var(--line);border-radius:12px;margin-bottom:12px}
+  .q .qt{font-size:14.5px;font-weight:600;margin-bottom:10px}
+  .opt{display:block;width:100%;text-align:left;border:1px solid var(--line);background:#fff;border-radius:9px;padding:9px 12px;margin-bottom:8px;cursor:pointer;font-size:14px}
+  .opt.sel{border-color:var(--blue);background:var(--blue-light)}
+  .opt.right{background:#d8f5e6;border-color:var(--ok)}
+  .opt.wrong{background:#fde2df;border-color:var(--bad)}
+  .result{text-align:center;padding:20px}
+  .result .score{font-size:40px;font-weight:800;color:var(--blue-dark)}
+  /* role play chat */
+  .rp-chat{display:flex;flex-direction:column;gap:10px;margin:10px 0}
+  .bubble{max-width:80%;padding:10px 13px;border-radius:14px;font-size:14.5px}
+  .bubble .who{font-size:11px;font-weight:700;margin-bottom:3px;opacity:.8}
+  .bubble.partner{align-self:flex-start;background:#fff;border:1px solid var(--line)}
+  .bubble.partner .who{color:var(--blue)}
+  .bubble.user{align-self:flex-end;background:var(--blue);color:#fff}
+  .bubble.note{align-self:flex-start;background:#fff7e6;border:1px solid #ffe1a8;font-size:13px;color:#8a5a00}
+  .bubble .zh{font-size:12.5px;opacity:.85;margin-top:4px}
+  .rp-input{display:flex;gap:8px;align-items:flex-end;margin-top:8px}
+  .rp-input textarea{flex:1;border:1px solid var(--line);border-radius:10px;padding:9px;font-size:14px;resize:vertical}
+  .rp-typing{font-size:12px;color:var(--muted);font-style:italic}
+  /* misc */
+  .muted{color:var(--muted);font-size:13px}
+  .center{text-align:center}
+  /* settings modal */
+  .modal{position:fixed;inset:0;background:rgba(15,23,42,.45);z-index:200;display:flex;align-items:center;justify-content:center;padding:16px}
+  .modal-card{background:#fff;border-radius:16px;width:100%;max-width:460px;max-height:90vh;overflow:auto;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+  .modal-head{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;border-bottom:1px solid var(--line);font-weight:700;color:var(--blue-dark)}
+  .modal-head .x{border:none;background:#f1f5f9;width:30px;height:30px;border-radius:8px;cursor:pointer;font-size:15px}
+  .modal-body{padding:16px 18px}
+  .modal-body h3{font-size:14px;color:var(--blue-dark);margin:14px 0 8px}
+  .modal-body h3:first-child{margin-top:0}
+  .modal-body label{display:block;font-size:13px;color:var(--muted);margin:10px 0 4px}
+  .modal-body select,.modal-body input,.modal-body textarea{width:100%;border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:14px;font-family:inherit}
+  .modal-body input[type=range]{padding:0}
+  .modal-foot{padding:12px 18px;border-top:1px solid var(--line);text-align:right}
+  @media(max-width:560px){.stats{grid-template-columns:repeat(2,1fr)}nav{top:60px}}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div>
+    <h1>📘 商务英语学习网页端</h1>
+    <div class="sub">职场新人 / 外贸业务员 · 碎片时间练商务英语（含小型机械行业术语）</div>
+  </div>
+  <button class="gear" id="gearBtn" title="设置（发音 / 对话API）">⚙️</button>
+</div>
+<nav id="nav">
+  <button data-tab="home" class="active">🏠 首页/进度</button>
+  <button data-tab="vocab">🗂 词汇卡</button>
+  <button data-tab="dialog">💬 情景对话</button>
+  <button data-tab="listen">🎧 听力训练</button>
+  <button data-tab="quiz">📝 小测验</button>
+  <button data-tab="role">🎭 角色扮演</button>
+  <button data-tab="wrong">📕 错题本<span class="badge" id="wrongBadge"></span></button>
+</nav>
+
+<div class="wrap">
+
+  <!-- HOME -->
+  <section id="home" class="tab">
+    <div class="card">
+      <h2>📊 我的学习进度</h2>
+      <div class="stats">
+        <div class="stat"><div class="num" id="stStreak">0</div><div class="lbl">连续打卡(天)</div></div>
+        <div class="stat"><div class="num" id="stDays">0</div><div class="lbl">累计学习(天)</div></div>
+        <div class="stat"><div class="num" id="stWords">0</div><div class="lbl">已掌握单词</div></div>
+        <div class="stat"><div class="num" id="stQuiz">—</div><div class="lbl">测验平均分</div></div>
+      </div>
+      <div class="checkin">
+        <button class="btn" id="checkinBtn">✅ 今日打卡</button>
+        <div class="muted" id="checkinTip" style="margin-top:8px"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h2>🚀 快速开始</h2>
+      <p class="muted">点上方导航切换模块。词汇卡可翻转记忆、可⭐收藏；情景对话点句看中文并跟读；听力训练含「填空练习」与「真实语料跟读」，测验做完即时判分，错题自动进「错题本」。⚙️ 可设置美式语音与角色扮演对话 API。所有进度自动保存在本机浏览器。</p>
+    </div>
+  </section>
+
+  <!-- VOCAB -->
+  <section id="vocab" class="tab hidden">
+    <div class="card">
+      <h2>📥 导入词库（CSV）</h2>
+      <p class="muted">用 Excel 打开词表 → 另存为 <b>CSV(UTF-8)</b> → 选择文件导入。列顺序：分类, 英文, 音标, 中文, 例句英文, 例句中文（第一行可写表头）。</p>
+      <input type="file" id="csvFile" accept=".csv">
+      <button class="btn sm" id="csvImport" style="margin-left:8px">导入</button>
+      <div id="csvMsg" class="muted" style="margin-top:8px"></div>
+    </div>
+    <div class="card">
+      <h2>🗂 商务词汇卡 <span class="muted" style="font-weight:400;font-size:12px">（点击卡片翻转 · 标记掌握 · ⭐收藏 · 🔊朗读）</span></h2>
+      <div style="margin-bottom:12px"><button class="btn sm ghost" id="favFilter">⭐ 我的收藏 (<span id="favCount">0</span>)</button></div>
+      <div class="chips" id="vocabChips"></div>
+      <div class="deck" id="vocabDeck"></div>
+    </div>
+  </section>
+
+  <!-- DIALOGUE -->
+  <section id="dialog" class="tab hidden">
+    <div class="card">
+      <h2>💬 情景对话 <span class="muted" style="font-weight:400;font-size:12px">（点句子看中文 · 🔊 跟读）</span></h2>
+      <div class="scene-tabs" id="sceneTabs"></div>
+      <div id="dialogBox"></div>
+    </div>
+  </section>
+
+  <!-- LISTENING -->
+  <section id="listen" class="tab hidden">
+    <div class="card">
+      <h2>🎧 听力训练 <span class="muted" style="font-weight:400;font-size:12px">（填空练习 + 真实语料跟读）</span></h2>
+      <div class="scene-tabs" id="listenTabs" style="margin-bottom:12px">
+        <div class="scene active" data-mode="fill">✏️ 填空练习</div>
+        <div class="scene" data-mode="real">🎙 真实语料（探厂素材）</div>
+      </div>
+      <div id="listenBox"></div>
+      <div class="center" id="listenActions" style="margin-top:10px">
+        <button class="btn" id="listenCheck">检查答案</button>
+        <button class="btn ghost" id="listenReset">重置</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- QUIZ -->
+  <section id="quiz" class="tab hidden">
+    <div class="card">
+      <h2>📝 小测验 <span class="muted" style="font-weight:400;font-size:12px">（商务词汇与搭配）</span></h2>
+      <div id="quizBox"></div>
+      <div class="center" id="quizAction" style="margin-top:10px">
+        <button class="btn" id="quizSubmit">提交答卷</button>
+        <button class="btn ghost hidden" id="quizRetry">再做一次</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ROLE PLAY -->
+  <section id="role" class="tab hidden">
+    <div class="card">
+      <h2>🎭 角色扮演 · 开放式自由对话 <span class="muted" style="font-weight:400;font-size:12px">（你自由用英语回复，对方由 AI 生成）</span></h2>
+      <div class="scene-tabs" id="rpTabs"></div>
+      <div id="rpBox"></div>
+    </div>
+  </section>
+
+  <!-- WRONG QUIZ -->
+  <section id="wrong" class="tab hidden">
+    <div class="card">
+      <h2>📕 错题本 <span class="muted" style="font-weight:400;font-size:12px">（测验答错的题自动收录）</span></h2>
+      <div class="center" style="margin:6px 0 12px">
+        <button class="btn sm" id="wrongRetry">🔁 重做这些错题</button>
+        <button class="btn sm ghost" id="wrongClear">清空错题本</button>
+      </div>
+      <div id="wrongBox"></div>
+    </div>
+  </section>
+
+</div>
+
+<!-- SETTINGS MODAL -->
+<div id="settingsModal" class="modal hidden">
+  <div class="modal-card">
+    <div class="modal-head">⚙️ 设置 <button class="x" id="setClose">✕</button></div>
+    <div class="modal-body">
+      <h3>🔊 发音（美式优先）</h3>
+      <label>语音</label>
+      <select id="voiceSel"></select>
+      <label>语速 <span id="rateVal">0.95</span>×</label>
+      <input type="range" id="rate" min="0.5" max="1.5" step="0.05" value="0.95">
+      <label>音调 <span id="pitchVal">1.00</span></label>
+      <input type="range" id="pitch" min="0" max="2" step="0.05" value="1">
+      <div style="margin-top:8px"><button class="btn sm" id="voiceTest">🔊 试听语音</button></div>
+
+      <h3>🤖 角色扮演对话 API（OpenAI 兼容）</h3>
+      <label>Base URL</label>
+      <input id="apiBase" placeholder="https://api.deepseek.com/v1">
+      <label>API Key</label>
+      <input id="apiKey" type="password" placeholder="sk-...">
+      <label>模型名</label>
+      <input id="apiModel" placeholder="deepseek-chat">
+      <label>系统提示词（可选，留空用默认）</label>
+      <textarea id="apiSys" rows="2" placeholder="你扮演对方，用简短自然的英语回复…"></textarea>
+      <div class="muted" style="margin:6px 0">未填 Key 时，角色扮演使用本地关键词反馈模式仍可练习。浏览器直连可能因 CORS 被拦截；若报错可改用 OpenRouter 等支持跨域的服务。</div>
+      <button class="btn sm" id="apiTest">测试连接</button>
+      <div id="apiTestMsg" class="muted" style="margin-top:6px"></div>
+    </div>
+    <div class="modal-foot"><button class="btn" id="setSave">保存</button></div>
+  </div>
+</div>
+
+<script>
+/* 自检横幅：若能看到这条绿条闪过，说明 JS 已正常执行（用于排查"点击无反应"） */
+(function(){
+  try{
+    const b=document.createElement('div');
+    b.textContent='✅ 页面脚本已加载，可正常交互';
+    b.style.cssText='position:fixed;top:0;left:50%;transform:translateX(-50%);background:#1aa86b;color:#fff;font-size:13px;padding:8px 16px;border-radius:0 0 10px 10px;z-index:99999;box-shadow:0 4px 12px rgba(0,0,0,.2)';
+    document.body.appendChild(b);
+    setTimeout(()=>{b.style.transition='opacity .5s';b.style.opacity='0';setTimeout(()=>b.remove(),600);},2500);
+  }catch(e){}
+})();
+/* 页面级错误捕获：放在最前面，任何初始化异常都会在底部红条显示，方便排查 */
+window.addEventListener('error',function(e){
+  let b=document.getElementById('errBar');
+  if(!b){b=document.createElement('div');b.id='errBar';
+    b.style.cssText='position:fixed;left:0;right:0;bottom:0;background:#e2483d;color:#fff;font-size:13px;padding:10px 14px;z-index:9999;white-space:pre-wrap';
+    document.body.appendChild(b);}
+  b.textContent='⚠️ 运行错误：'+((e&&e.message)||e)+'（如持续出现请截图告诉我）';
+});
+/* ============ 数据 ============ */
+const vocabData = {
+  "邮件":[
+    {en:"attachment",ph:"/əˈtætʃmənt/",zh:"附件",ex:"Please find the attachment for your review.",zhEx:"请查收附件以供查阅。"},
+    {en:"follow up",ph:"/ˈfɒləʊ ʌp/",zh:"跟进",ex:"I'll follow up with the client tomorrow.",zhEx:"我明天会跟进这位客户。"},
+    {en:"as per",ph:"/æz pɜː/",zh:"按照",ex:"As per our conversation, I revised the quote.",zhEx:"按我们的沟通，我修改了报价。"},
+    {en:"enclose",ph:"/ɪnˈkləʊz/",zh:"随信附上",ex:"We enclose the proforma invoice.",zhEx:"我们随信附上形式发票。"},
+    {en:"regards",ph:"/rɪˈɡɑːdz/",zh:"致意（落款）",ex:"Best regards, Sales Team.",zhEx:"顺祝商祺，销售团队。"},
+    {en:"prompt",ph:"/prɒmpt/",zh:"及时的",ex:"Thanks for your prompt reply.",zhEx:"感谢您的及时回复。"},
+    {en:"deadline",ph:"/ˈdedlaɪn/",zh:"截止时间",ex:"We must hit the deadline.",zhEx:"我们必须赶上截止时间。"},
+    {en:"forward",ph:"/ˈfɔːwəd/",zh:"转发",ex:"Please forward the email to finance.",zhEx:"请把邮件转发给财务。"},
+    {en:"reminder",ph:"/rɪˈmaɪndə/",zh:"提醒",ex:"I'll send a reminder tomorrow.",zhEx:"我明天发个提醒。"},
+    {en:"bcc",ph:"",zh:"密送（隐蔽抄送）",ex:"I'll bcc you on this thread.",zhEx:"这封邮件我密送你一份。"}
+  ],
+  "会议":[
+    {en:"agenda",ph:"/əˈdʒendə/",zh:"议程",ex:"Let's go through the agenda first.",zhEx:"我们先过一遍议程。"},
+    {en:"minutes",ph:"/ˈmɪnɪts/",zh:"会议纪要",ex:"I'll circulate the minutes after the meeting.",zhEx:"会后我会分发纪要。"},
+    {en:"action item",ph:"/ˈækʃən ˈaɪtəm/",zh:"待办事项",ex:"Who owns this action item?",zhEx:"这项待办谁负责？"},
+    {en:"wrap up",ph:"/ræp ʌp/",zh:"结束、收尾",ex:"Let's wrap up in five minutes.",zhEx:"我们五分钟内收尾。"},
+    {en:"touch base",ph:"/tʌtʃ beɪs/",zh:"沟通一下",ex:"Let's touch base next week.",zhEx:"我们下周沟通一下。"},
+    {en:"recap",ph:"/ˈriːkæp/",zh:"回顾",ex:"Quick recap of today's decisions.",zhEx:"快速回顾今天的决议。"},
+    {en:"standup",ph:"/ˈstændʌp/",zh:"站会（每日短会）",ex:"We have a daily standup at 9.",zhEx:"我们每天9点开站会。"},
+    {en:"brainstorm",ph:"/ˈbreɪnstɔːm/",zh:"头脑风暴",ex:"Let's brainstorm some ideas.",zhEx:"我们头脑风暴一下。"},
+    {en:"delegate",ph:"/ˈdelɪɡeɪt/",zh:"委派（任务）",ex:"I'll delegate this to Sam.",zhEx:"我把这个委派给 Sam。"},
+    {en:"stakeholder",ph:"/ˈsteɪkhəʊldə/",zh:"利益相关方",ex:"Loop the stakeholders in.",zhEx:"把相关方拉进来。"}
+  ],
+  "谈判":[
+    {en:"bottom line",ph:"/ˈbɒtəm laɪn/",zh:"底线",ex:"What's your bottom line on price?",zhEx:"你在价格上的底线是多少？"},
+    {en:"concession",ph:"/kənˈseʃən/",zh:"让步",ex:"We can make a small concession.",zhEx:"我们可以做一点让步。"},
+    {en:"win-win",ph:"/wɪn wɪn/",zh:"双赢",ex:"Let's find a win-win solution.",zhEx:"我们找个双赢方案。"},
+    {en:"leverage",ph:"/ˈliːvərɪdʒ/",zh:"筹码/优势",ex:"We have leverage on delivery time.",zhEx:"我们在交期上有优势。"},
+    {en:"terms",ph:"/tɜːmz/",zh:"条款",ex:"The terms are acceptable.",zhEx:"条款可以接受。"},
+    {en:"quote",ph:"/kwəʊt/",zh:"报价",ex:"Can you send a formal quote?",zhEx:"能发正式报价吗？"},
+    {en:"discount",ph:"/ˈdɪskaʊnt/",zh:"折扣",ex:"Can you offer a volume discount?",zhEx:"能给量价折扣吗？"},
+    {en:"deposit",ph:"/dɪˈpɒzɪt/",zh:"定金",ex:"We require a 30% deposit.",zhEx:"我们要30%定金。"},
+    {en:"lead time",ph:"/liːd taɪm/",zh:"交货周期",ex:"Lead time is about 15 days.",zhEx:"交货周期约15天。"},
+    {en:"MOQ",ph:"",zh:"最小起订量",ex:"Our MOQ is 10 units.",zhEx:"最小起订量10台。"},
+    {en:"FOB",ph:"",zh:"离岸价（装运港船上交货）",ex:"Price is FOB Qingdao.",zhEx:"价格是青岛离岸价。"}
+  ],
+  "电话":[
+    {en:"hold on",ph:"/həʊld ɒn/",zh:"稍等",ex:"Hold on a moment, please.",zhEx:"请稍等一下。"},
+    {en:"put through",ph:"/pʊt θruː/",zh:"接通",ex:"I'll put you through to sales.",zhEx:"我给您接销售部。"},
+    {en:"call back",ph:"/kɔːl bæk/",zh:"回电",ex:"Please ask him to call back.",zhEx:"请让他回个电话。"},
+    {en:"speaking",ph:"/ˈspiːkɪŋ/",zh:"（我就是）",ex:"This is Tom speaking.",zhEx:"我是汤姆。"},
+    {en:"voicemail",ph:"/ˈvɔɪsmeɪl/",zh:"语音留言",ex:"Leave a message on voicemail.",zhEx:"请留语音留言。"},
+    {en:"confirm",ph:"/kənˈfɜːm/",zh:"确认",ex:"Let me confirm the order.",zhEx:"我确认一下订单。"},
+    {en:"extension",ph:"/ɪkˈstenʃən/",zh:"分机",ex:"Her extension is 204.",zhEx:"她分机是204。"},
+    {en:"operator",ph:"/ˈɒpəreɪtə/",zh:"总机/接线员",ex:"Hold for the operator, please.",zhEx:"请稍候转总机。"},
+    {en:"hang up",ph:"/hæŋ ʌp/",zh:"挂断",ex:"He hung up suddenly.",zhEx:"他突然挂了电话。"},
+    {en:"busy",ph:"/ˈbɪzi/",zh:"占线",ex:"The line is busy now.",zhEx:"线路现在占线。"},
+    {en:"message",ph:"/ˈmesɪdʒ/",zh:"留言",ex:"Can I leave a message?",zhEx:"我能留个口信吗？"}
+  ],
+  "面试":[
+    {en:"strength",ph:"/streŋθ/",zh:"优势",ex:"My strength is problem-solving.",zhEx:"我的优势是解决问题。"},
+    {en:"background",ph:"/ˈbækɡraʊnd/",zh:"背景",ex:"Tell me about your background.",zhEx:"介绍一下你的背景。"},
+    {en:"position",ph:"/pəˈzɪʃən/",zh:"职位",ex:"I applied for the sales position.",zhEx:"我应聘销售岗。"},
+    {en:"availability",ph:"/əˌveɪləˈbɪləti/",zh:"可到岗时间",ex:"What's your availability?",zhEx:"你什么时候能到岗？"},
+    {en:"team player",ph:"/tiːm ˈpleɪə/",zh:"团队协作型人才",ex:"I consider myself a team player.",zhEx:"我认为自己善于团队协作。"},
+    {en:"notice period",ph:"/ˈnəʊtɪs ˈpɪəriəd/",zh:"离职通知期",ex:"My notice period is one month.",zhEx:"我的离职通知期是一个月。"},
+    {en:"hire",ph:"/haɪə/",zh:"雇佣",ex:"When can you start if hired?",zhEx:"如果录用你什么时候能到岗？"},
+    {en:"salary",ph:"/ˈsæləri/",zh:"薪资",ex:"What's your expected salary?",zhEx:"你的期望薪资是多少？"},
+    {en:"benefit",ph:"/ˈbenɪfɪt/",zh:"福利",ex:"We offer health benefits.",zhEx:"我们提供健康福利。"},
+    {en:"remote",ph:"/rɪˈməʊt/",zh:"远程（办公）",ex:"Is this role fully remote?",zhEx:"这个岗位全远程吗？"},
+    {en:"relocate",ph:"/ˈriːləʊkeɪt/",zh:"搬迁/异地调动",ex:"Are you open to relocating?",zhEx:"你愿意异地调动吗？"}
+  ],
+  "挖掘机·工作装置":[
+    {en:"boom",ph:"/buːm/",zh:"动臂",ex:"The boom lifts the arm and bucket.",zhEx:"动臂举起小臂和铲斗。"},
+    {en:"arm",ph:"/ɑːm/",zh:"小臂（斗杆）",ex:"Extend the arm to reach farther.",zhEx:"伸出小臂以够得更远。"},
+    {en:"bucket",ph:"/ˈbʌkɪt/",zh:"铲斗",ex:"Use a trenching bucket for ditches.",zhEx:"挖沟用沟渠铲斗。"},
+    {en:"bucket capacity",ph:"",zh:"铲斗容量",ex:"Bucket capacity is 0.3 m³.",zhEx:"铲斗容量0.3立方米。"},
+    {en:"hydraulic cylinder",ph:"/haɪˈdrɔːlɪk ˈsɪlɪndə/",zh:"液压缸",ex:"The hydraulic cylinder lifts the boom.",zhEx:"液压缸举起动臂。"},
+    {en:"quick coupler",ph:"/kwɪk ˈkuːplə/",zh:"快换连接器",ex:"A quick coupler swaps attachments fast.",zhEx:"快换连接器可快速更换属具。"}
+  ],
+  "挖掘机·底盘行走":[
+    {en:"track",ph:"/træk/",zh:"履带",ex:"Rubber tracks reduce ground damage.",zhEx:"橡胶履带减少对地面损伤。"},
+    {en:"track shoe",ph:"",zh:"履带板",ex:"Replace the worn track shoe.",zhEx:"更换磨损的履带板。"},
+    {en:"undercarriage",ph:"/ˈʌndəkærɪdʒ/",zh:"底盘/行走装置",ex:"Check the undercarriage for wear.",zhEx:"检查底盘磨损情况。"},
+    {en:"turning radius",ph:"",zh:"转弯半径",ex:"Turning radius is 2.4 m.",zhEx:"转弯半径2.4米。"},
+    {en:"idler",ph:"/ˈaɪdlə/",zh:"引导轮",ex:"The idler keeps the track aligned.",zhEx:"引导轮保持履带对正。"},
+    {en:"sprocket",ph:"/ˈsprɒkɪt/",zh:"驱动轮",ex:"The sprocket drives the track.",zhEx:"驱动轮带动履带。"}
+  ],
+  "挖掘机·液压动力":[
+    {en:"hydraulic",ph:"/haɪˈdrɔːlɪk/",zh:"液压的",ex:"Hydraulic pressure drives the cylinder.",zhEx:"液压驱动油缸。"},
+    {en:"engine horsepower",ph:"",zh:"发动机马力",ex:"Engine horsepower is 55 kW.",zhEx:"发动机马力55千瓦。"},
+    {en:"pump",ph:"/pʌmp/",zh:"液压泵",ex:"The pump builds hydraulic pressure.",zhEx:"液压泵建立油压。"},
+    {en:"valve",ph:"/vælv/",zh:"阀",ex:"The control valve directs the flow.",zhEx:"控制阀引导油液流向。"}
+  ],
+  "挖掘机·操作工况":[
+    {en:"excavator",ph:"/ˈekskəveɪtə/",zh:"挖掘机",ex:"This excavator has a 5-ton operating weight.",zhEx:"这台挖掘机操作重量 5 吨。"},
+    {en:"operating weight",ph:"/ˈɒpəreɪtɪŋ weɪt/",zh:"操作重量",ex:"Operating weight affects transport.",zhEx:"操作重量影响运输。"},
+    {en:"digging depth",ph:"/ˈdɪɡɪŋ depθ/",zh:"挖掘深度",ex:"Max digging depth is 3.8 m.",zhEx:"最大挖掘深度 3.8 米。"},
+    {en:"counterweight",ph:"/ˈkaʊntəweɪt/",zh:"配重",ex:"The counterweight keeps it stable.",zhEx:"配重保持机身稳定。"},
+    {en:"cab",ph:"/kæb/",zh:"驾驶室",ex:"The cab has ROPS protection.",zhEx:"驾驶室带防滚翻保护。"}
+  ],
+  "滑移装载机":[
+    {en:"skid steer",ph:"/skɪd stɪə/",zh:"滑移装载机",ex:"A skid steer turns by braking one side.",zhEx:"滑移装载机靠单边制动转向。"},
+    {en:"loader",ph:"/ˈləʊdə/",zh:"装载机",ex:"The loader fills the truck quickly.",zhEx:"装载机快速装满卡车。"},
+    {en:"auxiliary hydraulics",ph:"/ɔːɡˈzɪliəri haɪˈdrɔːlɪks/",zh:"辅助液压",ex:"Auxiliary hydraulics power attachments.",zhEx:"辅助液压驱动属具。"},
+    {en:"ROPS",ph:"/rɒps/",zh:"防滚翻保护结构",ex:"The cab has certified ROPS.",zhEx:"驾驶室有认证防滚翻结构。"},
+    {en:"lift arm",ph:"/lɪft ɑːm/",zh:"举升臂",ex:"Raise the lift arm slowly.",zhEx:"缓慢举起举升臂。"},
+    {en:"quick attach",ph:"/kwɪk əˈtætʃ/",zh:"快换接头",ex:"Quick attach swaps the bucket fast.",zhEx:"快换接头可快速换铲斗。"},
+    {en:"tipping load",ph:"/ˈtɪpɪŋ ləʊd/",zh:"倾翻载荷",ex:"Never exceed the tipping load.",zhEx:"切勿超过倾翻载荷。"},
+    {en:"rated operating capacity",ph:"/ˈreɪtɪd ˈɒpəreɪtɪŋ kəˈpæsəti/",zh:"额定操作能力",ex:"Rated operating capacity is 800 kg.",zhEx:"额定操作能力 800 公斤。"},
+    {en:"tires",ph:"/ˈtaɪəz/",zh:"轮胎",ex:"Check the tire pressure weekly.",zhEx:"每周检查胎压。"},
+    {en:"radiator",ph:"/ˈreɪdieɪtə/",zh:"散热器",ex:"Clean the radiator fins often.",zhEx:"经常清理散热器翅片。"},
+    {en:"joystick",ph:"/ˈdʒɔɪstɪk/",zh:"操纵杆",ex:"Control it with the joystick.",zhEx:"用操纵杆操控它。"},
+    {en:"vertical lift",ph:"",zh:"垂直举升",ex:"It uses a vertical lift path.",zhEx:"它采用垂直举升路径。"},
+    {en:"control linkage",ph:"",zh:"操控连杆",ex:"Check the control linkage.",zhEx:"检查操控连杆。"}
+  ],
+  "商务邮件句型":[
+    {en:"I am writing to follow up on…",ph:"",zh:"我写邮件是为了跟进……",ex:"I am writing to follow up on our meeting yesterday.",zhEx:"我写这封邮件是为了跟进我们昨天的会议。"},
+    {en:"Please find the attached file.",ph:"",zh:"请查收附件。",ex:"Please find the attached file for your review.",zhEx:"请查收附件以供查阅。"},
+    {en:"I look forward to hearing from you.",ph:"",zh:"期待您的回复。",ex:"I look forward to hearing from you soon.",zhEx:"期待尽快收到您的回复。"},
+    {en:"Apologies for the delay.",ph:"",zh:"为延误致歉。",ex:"Apologies for the delay in replying.",zhEx:"很抱歉回复晚了。"},
+    {en:"Could you clarify the deadline?",ph:"",zh:"能否明确一下截止时间？",ex:"Could you clarify the deadline for this task?",zhEx:"能否明确这项任务的截止时间？"},
+    {en:"I've cc'd my manager.",ph:"",zh:"我已抄送经理。",ex:"I've cc'd my manager on this email.",zhEx:"这封邮件我抄送了经理。"},
+    {en:"Let me know if that works for you.",ph:"",zh:"如果可以请告诉我。",ex:"Let me know if that works for you.",zhEx:"如果对你合适请告诉我。"},
+    {en:"Per our conversation,",ph:"",zh:"按我们之前的沟通，",ex:"Per our conversation, I updated the quote.",zhEx:"按我们的沟通，我更新了报价。"},
+    {en:"Just circling back on this.",ph:"",zh:"就这事再跟进一下。",ex:"Just circling back on the proposal.",zhEx:"就提案再跟进一下。"},
+    {en:"Touching base regarding the proposal.",ph:"",zh:"就提案跟您同步进展。",ex:"Touching base regarding the proposal.",zhEx:"就提案跟您同步进展。"},
+    {en:"Thank you for your email.",ph:"",zh:"谢谢你的来信。",ex:"Thank you for your email about the order.",zhEx:"谢谢你关于订单的来信。"},
+    {en:"I'm afraid that won't be possible.",ph:"",zh:"恐怕这不行。",ex:"I'm afraid that won't be possible this week.",zhEx:"这周恐怕不行。"},
+    {en:"Please let me know your thoughts.",ph:"",zh:"请告知你的想法。",ex:"Please let me know your thoughts by Friday.",zhEx:"周五前请告诉我你的想法。"},
+    {en:"I'll get back to you shortly.",ph:"",zh:"我很快回复你。",ex:"I'll get back to you shortly.",zhEx:"我很快回复你。"},
+    {en:"Kind regards,",ph:"",zh:"此致敬礼（邮件结尾）",ex:"Kind regards, Tom from Sales.",zhEx:"此致，销售部汤姆。"}
+  ],
+  "会议协作":[
+    {en:"Sorry to interrupt, but…",ph:"",zh:"抱歉打断一下，但是……",ex:"Sorry to interrupt, but can we revisit this?",zhEx:"抱歉打断一下，我们能再讨论这点吗？"},
+    {en:"Can I jump in here?",ph:"",zh:"我可以插一句吗？",ex:"Can I jump in here with a quick point?",zhEx:"我可以插一句简短补充吗？"},
+    {en:"Let's table this for now.",ph:"",zh:"这个先搁置。",ex:"Let's table this for now and move on.",zhEx:"这个先搁置，继续下一项。"},
+    {en:"I'll take this offline.",ph:"",zh:"这个我线下处理。",ex:"I'll take this offline and follow up by email.",zhEx:"这个我线下处理，邮件跟进。"},
+    {en:"To recap,",ph:"",zh:"总结一下，",ex:"To recap, we agreed on three action items.",zhEx:"总结一下，我们达成了三项待办。"},
+    {en:"Let's align on the next steps.",ph:"",zh:"我们对下一步达成一致。",ex:"Let's align on the next steps before we leave.",zhEx:"结束前我们对下一步达成一致。"},
+    {en:"Do we have a decision on…?",ph:"",zh:"关于……我们有结论了吗？",ex:"Do we have a decision on the budget?",zhEx:"关于预算我们有结论了吗？"},
+    {en:"Could you share your screen?",ph:"",zh:"能共享一下屏幕吗？",ex:"Could you share your screen, please?",zhEx:"能共享一下屏幕吗？"},
+    {en:"Let's circle back to that.",ph:"",zh:"我们稍后再回到这点。",ex:"Let's circle back to that after the break.",zhEx:"休息后我们再回到这点。"},
+    {en:"I'll circle back with the numbers.",ph:"",zh:"我稍后把数据发回来。",ex:"I'll circle back with the numbers this afternoon.",zhEx:"我下午把数据发回来。"},
+    {en:"Let's take it offline.",ph:"",zh:"这个我们线下聊。",ex:"Let's take it offline after the call.",zhEx:"会后这个我们线下聊。"},
+    {en:"I'm not sure I follow.",ph:"",zh:"我不太明白。",ex:"I'm not sure I follow, can you repeat?",zhEx:"我不太明白，能重复一下吗？"},
+    {en:"Could you repeat that?",ph:"",zh:"能重复一下吗？",ex:"Could you repeat that, please?",zhEx:"能重复一下吗？"},
+    {en:"Let's get started.",ph:"",zh:"我们开始吧。",ex:"We're all here, let's get started.",zhEx:"都到齐了，开始吧。"},
+    {en:"Any questions so far?",ph:"",zh:"目前有问题吗？",ex:"Any questions so far?",zhEx:"目前有问题吗？"}
+  ],
+  "谈判沟通":[
+    {en:"Can you do better on price?",ph:"",zh:"价格上能再优惠吗？",ex:"Can you do better on price for a bulk order?",zhEx:"大批量订单价格能再优惠吗？"},
+    {en:"What's your best price?",ph:"",zh:"最低价是多少？",ex:"What's your best price for 50 units?",zhEx:"50 台的最低价是多少？"},
+    {en:"We can offer a volume discount.",ph:"",zh:"量大可以优惠。",ex:"We can offer a volume discount on large orders.",zhEx:"大单我们可以给量价折扣。"},
+    {en:"Let's meet in the middle.",ph:"",zh:"我们各让一步。",ex:"Let's meet in the middle on the unit price.",zhEx:"单价我们各让一步。"},
+    {en:"That's outside our budget.",ph:"",zh:"这超出我们的预算。",ex:"That's outside our budget this quarter.",zhEx:"这超出我们本季度预算。"},
+    {en:"I need this in writing.",ph:"",zh:"我需要书面确认。",ex:"I need this in writing before we proceed.",zhEx:"推进前我需要书面确认。"},
+    {en:"Let's lock in the terms.",ph:"",zh:"我们把条款定下来。",ex:"Let's lock in the terms today.",zhEx:"我们今天把条款定下来。"},
+    {en:"Is this your final offer?",ph:"",zh:"这是你的最终报价吗？",ex:"Is this your final offer, or is there room?",zhEx:"这是最终报价，还是还有空间？"},
+    {en:"We can include free shipping.",ph:"",zh:"我们可以包邮。",ex:"We can include free shipping as a concession.",zhEx:"作为让步我们可以包邮。"},
+    {en:"That works for us.",ph:"",zh:"这个我们可以接受。",ex:"That works for us, let's proceed.",zhEx:"这个我们可以接受，继续吧。"},
+    {en:"Can we get a better deal?",ph:"",zh:"能再优惠点吗？",ex:"Can we get a better deal on volume?",zhEx:"量大能再优惠吗？"},
+    {en:"That's our best offer.",ph:"",zh:"这是最优报价。",ex:"That's our best offer, take it or leave it.",zhEx:"这是最优报价，接受与否随你。"},
+    {en:"We'll throw in free training.",ph:"",zh:"我们额外送免费培训。",ex:"We'll throw in free training as a bonus.",zhEx:"作为额外赠送我们包培训。"},
+    {en:"Payment terms are net 30.",ph:"",zh:"付款条件30天账期。",ex:"Payment terms are net 30 days.",zhEx:"付款条件是30天账期。"},
+    {en:"We can split the shipment.",ph:"",zh:"我们可以分批发货。",ex:"We can split the shipment to save cost.",zhEx:"我们可以分批发货以降本。"}
+  ],
+  "高频动词短语":[
+    {en:"reach out",ph:"/riːtʃ aʊt/",zh:"联系（某人）",ex:"I'll reach out to the supplier today.",zhEx:"我今天联系供应商。"},
+    {en:"circle back",ph:"/ˈsɜːkl bæk/",zh:"回头再谈",ex:"Let's circle back to this tomorrow.",zhEx:"我们明天再谈这点。"},
+    {en:"bring up",ph:"/brɪŋ ʌp/",zh:"提出（话题）",ex:"Can I bring up a concern?",zhEx:"我能提个顾虑吗？"},
+    {en:"sort out",ph:"/sɔːt aʊt/",zh:"解决、理清",ex:"We need to sort out the shipment issue.",zhEx:"我们得解决发货问题。"},
+    {en:"come up with",ph:"/kʌm ʌp wɪð/",zh:"想出",ex:"She came up with a great idea.",zhEx:"她想了个好主意。"},
+    {en:"get back to",ph:"/ɡet bæk tuː/",zh:"回复",ex:"I'll get back to you this afternoon.",zhEx:"我下午回复你。"},
+    {en:"run by",ph:"/rʌn baɪ/",zh:"征求……意见",ex:"Let me run this by my manager.",zhEx:"我征求一下经理的意见。"},
+    {en:"push back",ph:"/pʊʃ bæk/",zh:"反对、推迟",ex:"They pushed back on the timeline.",zhEx:"他们对时间表提出了异议。"},
+    {en:"nail down",ph:"/neɪl daʊn/",zh:"确定",ex:"We need to nail down the details.",zhEx:"我们得把细节定下来。"},
+    {en:"touch base",ph:"/tʌtʃ beɪs/",zh:"沟通一下",ex:"Let's touch base before the call.",zhEx:"通话前我们沟通一下。"},
+    {en:"follow through",ph:"/ˈfɒləʊ θruː/",zh:"落实、贯彻",ex:"Let's follow through on the plan.",zhEx:"我们把计划落实下去。"},
+    {en:"line up",ph:"/laɪn ʌp/",zh:"安排、组织",ex:"I'll line up a meeting with them.",zhEx:"我会安排一次和他们开会。"},
+    {en:"walk through",ph:"/wɔːk θruː/",zh:"逐步讲解",ex:"Let me walk you through the steps.",zhEx:"我一步步给你讲。"},
+    {en:"check in",ph:"/tʃek ɪn/",zh:"确认进度",ex:"I'll check in next week.",zhEx:"我下周确认一下进度。"},
+    {en:"ramp up",ph:"/ræmp ʌp/",zh:"逐步增加",ex:"We'll ramp up production.",zhEx:"我们会逐步增产。"}
+  ],
+  "地道口语热词":[
+    {en:"loop someone in",ph:"",zh:"把某人拉进沟通/同步",ex:"Let's loop Sarah in on this.",zhEx:"我们把 Sarah 拉进来同步一下。"},
+    {en:"on the same page",ph:"",zh:"达成共识",ex:"We need to be on the same page first.",zhEx:"我们得先达成一致。"},
+    {en:"low-hanging fruit",ph:"",zh:"容易达成的成果",ex:"Let's grab the low-hanging fruit first.",zhEx:"我们先摘低垂的果实（做容易的）。"},
+    {en:"bandwidth",ph:"",zh:"精力/时间（口语）",ex:"I don't have the bandwidth this week.",zhEx:"我这周没精力（时间）做这个。"},
+    {en:"wear multiple hats",ph:"",zh:"身兼数职",ex:"In a startup you wear multiple hats.",zhEx:"初创公司里你身兼数职。"},
+    {en:"ballpark",ph:"",zh:"大概的数字",ex:"Can you give me a ballpark figure?",zhEx:"能给个大概的数字吗？"},
+    {en:"game changer",ph:"",zh:"改变局势的事物",ex:"This feature is a game changer.",zhEx:"这个功能是个颠覆者。"},
+    {en:"ghost",ph:"",zh:"（突然）失联不回复",ex:"The candidate ghosted after the interview.",zhEx:"候选人面试后突然失联了。"},
+    {en:"circle back",ph:"",zh:"回头再跟进",ex:"I'll circle back next week.",zhEx:"我下周再跟进。"},
+    {en:"touch base",ph:"",zh:"碰一下、同步",ex:"Let's touch base tomorrow.",zhEx:"我们明天碰一下。"},
+    {en:"bring to the table",ph:"",zh:"能带来的价值/资源",ex:"What do you bring to the table?",zhEx:"你能带来什么价值？"},
+    {en:"move the needle",ph:"",zh:"取得实质进展",ex:"We need to move the needle this quarter.",zhEx:"本季我们要有实质进展。"},
+    {en:"double-click",ph:"",zh:"深入了解",ex:"Let's double-click on that issue.",zhEx:"我们深挖一下这个问题。"},
+    {en:"drill down",ph:"",zh:"深入剖析",ex:"Let's drill down into the data.",zhEx:"我们深入看下数据。"},
+    {en:"sync",ph:"/sɪŋk/",zh:"同步（沟通）",ex:"Let's sync tomorrow morning.",zhEx:"我们明早同步一下。"}
+  ],
+  "面试职场":[
+    {en:"Why are you a good fit?",ph:"",zh:"你为什么适合这个岗位？",ex:"Why are you a good fit for this role?",zhEx:"你为什么适合这个岗位？"},
+    {en:"Where do you see yourself in 5 years?",ph:"",zh:"五年后你想达到什么状态？",ex:"Where do you see yourself in 5 years?",zhEx:"五年后你在哪？"},
+    {en:"What's your greatest strength?",ph:"",zh:"你最大的优势是什么？",ex:"What's your greatest strength?",zhEx:"你最大的优势是什么？"},
+    {en:"Tell me about a challenge you overcame.",ph:"",zh:"讲讲你克服的一个挑战。",ex:"Tell me about a challenge you overcame.",zhEx:"讲讲你克服的一个挑战。"},
+    {en:"I'm a quick learner.",ph:"",zh:"我学东西很快。",ex:"I'm a quick learner and adapt fast.",zhEx:"我学得快，适应也快。"},
+    {en:"I work well under pressure.",ph:"",zh:"我能承受压力工作。",ex:"I work well under pressure and meet deadlines.",zhEx:"我能抗压并按时交付。"},
+    {en:"I'm passionate about…",ph:"",zh:"我对……充满热情。",ex:"I'm passionate about cross-border trade.",zhEx:"我对跨境电商充满热情。"},
+    {en:"My biggest weakness is…",ph:"",zh:"我最大的不足是……",ex:"My biggest weakness is delegating tasks.",zhEx:"我最大的不足是不太会授权。"},
+    {en:"I'm a team player.",ph:"",zh:"我善于团队协作。",ex:"I'm a team player and collaborative.",zhEx:"我善于协作。"},
+    {en:"I'm eager to learn.",ph:"",zh:"我很渴望学习。",ex:"I'm eager to learn and grow with the team.",zhEx:"我渴望学习并与团队共同成长。"},
+    {en:"What are your salary expectations?",ph:"",zh:"你的薪资期望？",ex:"What are your salary expectations?",zhEx:"你的薪资期望是多少？"},
+    {en:"Why should we hire you?",ph:"",zh:"我们为何要录用你？",ex:"Why should we hire you over others?",zhEx:"我们为什么该录用你而非别人？"},
+    {en:"Describe a time you failed.",ph:"",zh:"讲一次失败经历。",ex:"Describe a time you failed and what you learned.",zhEx:"讲一次你失败及学到的教训。"},
+    {en:"How do you handle conflict?",ph:"",zh:"你怎么处理冲突？",ex:"How do you handle conflict in a team?",zhEx:"你怎么处理团队里的冲突？"},
+    {en:"What motivates you?",ph:"",zh:"什么激励你？",ex:"What motivates you at work?",zhEx:"工作中什么激励你？"}
+  ]
+};
+
+const dialogues = {
+  "客户投诉处理":[
+    {who:"客户",en:"The excavator arrived with a cracked bucket.",zh:"挖掘机到货时铲斗有裂缝。"},
+    {who:"销售",en:"I'm sorry to hear that. Let me check the photos.",zh:"很抱歉听到这个，我看一下照片。"},
+    {who:"销售",en:"We'll send a replacement bucket free of charge.",zh:"我们会免费发一个替换铲斗。"},
+    {who:"客户",en:"How long will the delivery take?",zh:"交货要多久？"},
+    {who:"销售",en:"About five business days to your port.",zh:"到你们港口大约 5 个工作日。"},
+    {who:"客户",en:"Great, please confirm by email.",zh:"好的，请用邮件确认。"}
+  ],
+  "价格谈判":[
+    {who:"买家",en:"Your quote is 8% above the market.",zh:"你的报价比市场高 8%。"},
+    {who:"卖家",en:"Our hydraulic parts are top tier.",zh:"我们的液压件是一流的。"},
+    {who:"买家",en:"Can you offer a better price for 20 units?",zh:"订 20 台能给更好价格吗？"},
+    {who:"卖家",en:"For that volume, I can do 3% off.",zh:"这个量我可以让 3%。"},
+    {who:"买家",en:"Deal, send the revised contract.",zh:"成交，发修订合同。"}
+  ],
+  "面试":[
+    {who:"考官",en:"Why do you want this sales role?",zh:"为什么想做这个销售岗？"},
+    {who:"应聘者",en:"I enjoy building client relationships.",zh:"我喜欢建立客户关系。"},
+    {who:"考官",en:"What's your strength?",zh:"你的优势是什么？"},
+    {who:"应聘者",en:"I'm a team player and a fast learner.",zh:"我善于协作且学得快。"}
+  ],
+  "电话预约":[
+    {who:"A",en:"Hello, this is Tom speaking.",zh:"你好，我是汤姆。"},
+    {who:"B",en:"Hi Tom, put me through to the manager.",zh:"汤姆你好，请帮我接经理。"},
+    {who:"A",en:"Hold on, I'll transfer you.",zh:"稍等，我转接。"}
+  ],
+  "机械规格沟通":[
+    {who:"客户",en:"What's the operating weight of this skid steer?",zh:"这台滑移装载机操作重量多少？"},
+    {who:"销售",en:"Rated operating capacity is 800 kg.",zh:"额定操作能力 800 公斤。"},
+    {who:"客户",en:"Does it have auxiliary hydraulics?",zh:"有辅助液压吗？"},
+    {who:"销售",en:"Yes, with a quick attach for the auger.",zh:"有，带快换接头可装螺旋钻。"},
+    {who:"客户",en:"Perfect, I'll place the order.",zh:"太好了，我下单。"}
+  ]
+};
+
+const listenData = [
+  {sent:"We look forward to ___ from you soon.",ans:["hearing"]},
+  {sent:"Please find the ___ invoice enclosed.",ans:["proforma","pro forma"]},
+  {sent:"The ___ weight of this excavator is 5 tons.",ans:["operating"]},
+  {sent:"A skid steer uses ___ hydraulics for attachments.",ans:["auxiliary"]},
+  {sent:"Let's find a ___ solution for both sides.",ans:["win-win"]},
+  {sent:"I'll ___ up the meeting in five minutes.",ans:["wrap"]},
+  {sent:"The ___ keeps the machine stable on slopes.",ans:["counterweight"]},
+  {sent:"Never exceed the ___ load of the loader.",ans:["tipping"]},
+  {sent:"We can offer a ___ discount for bulk orders.",ans:["volume"]},
+  {sent:"The lead ___ for this order is 15 days.",ans:["time"]},
+  {sent:"Please ___ me through to the manager.",ans:["put","transfer"]},
+  {sent:"Our ___ is 10 units for this model.",ans:["MOQ"]},
+  {sent:"I'll ___ back to you shortly.",ans:["get"]},
+  {sent:"Let's ___ in the middle on the price.",ans:["meet"]},
+  {sent:"We need to ___ out the shipment issue.",ans:["sort"]},
+  {sent:"I'm a quick ___, I adapt fast.",ans:["learner"]}
+];
+
+const baseQuiz = [
+  {q:"We look forward to ___ from you.",opt:["hear","hearing","heard","hear from"],a:1},
+  {q:"Please find the ___ attached.",opt:["agenda","minutes","attachment","quote"],a:2},
+  {q:"The ___ lifts the arm and bucket on an excavator.",opt:["track","boom","bucket","ROPS"],a:1},
+  {q:"A skid steer turns by braking ___ side.",opt:["the front","one","both","neither"],a:1},
+  {q:"Let's find a ___ solution acceptable to both.",opt:["bottom","win-win","concession","leverage"],a:1},
+  {q:"___ hydraulics power the auger on a skid steer.",opt:["Auxiliary","Operating","Tipping","Quick"],a:0},
+  {q:"What's your ___ on the price?",opt:["agenda","bottom line","minutes","voicemail"],a:1},
+  {q:"I'll ___ up the meeting in five minutes.",opt:["wrap","recap","enclose","confirm"],a:0},
+  {q:"The ___ keeps the excavator stable on slopes.",opt:["undercarriage","counterweight","boom","track"],a:1},
+  {q:"Never exceed the ___ load of the loader.",opt:["operating","rated","tipping","quick attach"],a:2},
+  {q:"I am writing to ___ on our meeting.",opt:["follow up","attach","enclose","confirm"],a:0},
+  {q:"Let's ___ this for now and move on.",opt:["table","wrap","recap","enclose"],a:0},
+  {q:"We can offer a ___ discount for bulk orders.",opt:["volume","bottom","quick","tipping"],a:0},
+  {q:"Could you ___ the deadline for this task?",opt:["clarify","attach","enclose","recap"],a:0},
+  {q:"Let's ___ on the next steps before we leave.",opt:["align","wrap","ghost","table"],a:0},
+  {q:"Our ___ is 10 units for this model.",opt:["MOQ","deposit","quote","lead time"],a:0},
+  {q:"We can offer a ___ discount for bulk orders.",opt:["volume","bottom","quick","tipping"],a:0},
+  {q:"The ___ for this order is about 15 days.",opt:["lead time","bottom line","MOQ","terms"],a:0},
+  {q:"Please ___ me through to the manager.",opt:["put","hold","call","speak"],a:0},
+  {q:"The hydraulic ___ lifts the boom on an excavator.",opt:["cylinder","track","bucket","counterweight"],a:0},
+  {q:"A skid steer uses ___ lift for max height.",opt:["vertical","quick","auxiliary","tipping"],a:0},
+  {q:"Let's ___ through the plan step by step.",opt:["walk","run","sort","reach"],a:0},
+  {q:"We'll ___ in free training as a bonus.",opt:["throw","meet","wrap","ghost"],a:0},
+  {q:"What do you ___ to the table?",opt:["bring","wear","reach","loop"],a:0},
+  {q:"I'm a quick ___, I adapt fast.",opt:["learner","player","hat","loser"],a:0}
+];
+let currentQuiz = baseQuiz;
+
+/* ============ 进度存储 ============ */
+const KEY="bizEngProgress_v1";
+function load(){
+  try{return JSON.parse(localStorage.getItem(KEY))||{}}catch(e){return{}}
+}
+let state = load();
+/* 合并已导入的自定义词库（持久化在 localStorage） */
+if(state.imported && state.imported.length){
+  state.imported.forEach(r=>{
+    vocabData[r.cat]=vocabData[r.cat]||[];
+    if(!vocabData[r.cat].some(w=>w.en.toLowerCase()===r.en.toLowerCase())) vocabData[r.cat].push(r);
+  });
+}
+state.wordStatus = state.wordStatus||{};   // {en: 'm'|'n'}
+state.quizScores = state.quizScores||[];
+state.fav = state.fav||{};                   // {en: true}
+state.wrongQuiz = state.wrongQuiz||[];       // [{q, correct, wrong, ts}]
+state.settings = state.settings||{rate:0.95, pitch:1, voiceURI:""};
+state.api = state.api||{baseURL:"https://api.deepseek.com/v1", apiKey:"", model:"deepseek-chat", system:""};
+function save(){ try{localStorage.setItem(KEY,JSON.stringify(state));}catch(e){/* 隐私模式或 file:// 限制时忽略，进度仅本次有效 */} }
+function todayStr(){return new Date().toISOString().slice(0,10);}
+function markStudied(){
+  state.days = state.days||[];
+  const t=todayStr();
+  if(!state.days.includes(t)){state.days.push(t);save();}
+}
+
+function masteredCount(){return Object.values(state.wordStatus).filter(v=>v==='m').length;}
+function streak(){
+  const d=state.days||[]; if(!d.length)return 0;
+  const set=new Set(d); let s=0; let cur=new Date();
+  if(!set.has(cur.toISOString().slice(0,10))) cur.setDate(cur.getDate()-1);
+  while(set.has(cur.toISOString().slice(0,10))){s++;cur.setDate(cur.getDate()-1);}
+  return s;
+}
+function avgQuiz(){
+  if(!state.quizScores.length)return "—";
+  return Math.round(state.quizScores.reduce((a,b)=>a+b,0)/state.quizScores.length);
+}
+function updateWrongBadge(){
+  const b=document.getElementById('wrongBadge');
+  if(b) b.textContent = state.wrongQuiz.length?(' '+state.wrongQuiz.length):'';
+  const fc=document.getElementById('favCount');
+  if(fc) fc.textContent = Object.keys(state.fav).length;
+}
+
+/* ============ 语音 ============ */
+let allVoices=[];
+function getVoiceByURI(uri){ return allVoices.find(v=>v.voiceURI===uri); }
+function loadVoices(){
+  try{ allVoices = window.speechSynthesis.getVoices()||[]; }catch(e){ allVoices=[]; }
+  fillVoiceSel();
+}
+function fillVoiceSel(){
+  const sel=document.getElementById('voiceSel'); if(!sel)return;
+  if(!allVoices.length){ sel.innerHTML='<option value="">（浏览器暂无可用的语音）</option>'; return; }
+  const en=allVoices.filter(v=>/^en/i.test(v.lang));
+  const list = en.length? en : allVoices;
+  list.sort((a,b)=>{
+    const sa=(/en-US/i.test(a.lang)?0:1), sb=(/en-US/i.test(b.lang)?0:1);
+    if(sa!==sb)return sa-sb;
+    const ka=/neural|natural|enhanced|samantha|google us/i.test(a.name)?0:1;
+    const kb=/neural|natural|enhanced|samantha|google us/i.test(b.name)?0:1;
+    return ka-kb;
+  });
+  sel.innerHTML = list.map(v=>`<option value="${v.voiceURI}">${v.name} (${v.lang})</option>`).join('');
+  const cur = (state.settings&&state.settings.voiceURI);
+  if(cur && list.some(v=>v.voiceURI===cur)) sel.value=cur;
+  else if(list.length) sel.value=list[0].voiceURI;
+}
+function speak(text){
+  if(!('speechSynthesis'in window)){alert("当前浏览器不支持语音朗读");return;}
+  const s=state.settings||{};
+  const u=new SpeechSynthesisUtterance(text);
+  u.lang='en-US';
+  u.rate = (typeof s.rate==='number')? s.rate : 0.95;
+  u.pitch = (typeof s.pitch==='number')? s.pitch : 1;
+  if(s.voiceURI){ const v=getVoiceByURI(s.voiceURI); if(v) u.voice=v; }
+  try{ window.speechSynthesis.cancel(); window.speechSynthesis.speak(u); }catch(e){}
+}
+if('speechSynthesis'in window){ loadVoices(); window.speechSynthesis.onvoiceschanged=loadVoices; }
+
+/* ============ 导航 ============ */
+const nav=document.getElementById('nav');
+function switchTab(t){
+  document.querySelectorAll('#nav button').forEach(x=>x.classList.toggle('active',x.dataset.tab===t));
+  document.querySelectorAll('.tab').forEach(s=>s.classList.add('hidden'));
+  const sec=document.getElementById(t); if(sec) sec.classList.remove('hidden');
+  if(t==='home')renderHome();
+  if(t==='wrong')renderWrong();
+}
+nav.addEventListener('click',e=>{
+  const b=e.target.closest('button'); if(!b)return;
+  switchTab(b.dataset.tab);
+});
+
+/* ============ 首页 ============ */
+function renderHome(){
+  document.getElementById('stStreak').textContent=streak();
+  document.getElementById('stDays').textContent=(state.days||[]).length;
+  document.getElementById('stWords').textContent=masteredCount();
+  document.getElementById('stQuiz').textContent=avgQuiz();
+  const tip=document.getElementById('checkinTip');
+  if((state.days||[]).includes(todayStr())) tip.textContent="✅ 今天已打卡，继续保持！";
+  else tip.textContent="今天还没打卡，点上面按钮记录一下吧。";
+  updateWrongBadge();
+}
+document.getElementById('checkinBtn').addEventListener('click',()=>{
+  markStudied(); renderHome();
+  document.getElementById('checkinTip').textContent="✅ 已打卡，连续 "+streak()+" 天，加油！";
+});
+
+/* ============ 词汇卡 ============ */
+const vocabChips=document.getElementById('vocabChips');
+const vocabDeck=document.getElementById('vocabDeck');
+let curCat=Object.keys(vocabData)[0];
+let vocabMode='cat'; // 'cat' | 'fav'
+function buildVocabChips(){
+  vocabChips.innerHTML='';
+  Object.keys(vocabData).forEach((cat,i)=>{
+    const c=document.createElement('div');
+    c.className='chip'+(i===0?' active':''); c.textContent=cat; c.dataset.cat=cat;
+    vocabChips.appendChild(c);
+  });
+}
+buildVocabChips();
+vocabChips.addEventListener('click',e=>{
+  const c=e.target.closest('.chip'); if(!c)return;
+  vocabMode='cat'; curCat=c.dataset.cat;
+  document.querySelectorAll('#vocabChips .chip').forEach(x=>x.classList.remove('active'));
+  c.classList.add('active'); renderVocab();
+});
+document.getElementById('favFilter').addEventListener('click',()=>{
+  vocabMode='fav';
+  document.querySelectorAll('#vocabChips .chip').forEach(x=>x.classList.remove('active'));
+  renderVocab();
+});
+function renderVocab(){
+  vocabDeck.innerHTML='';
+  let list=[];
+  if(vocabMode==='fav'){
+    Object.keys(vocabData).forEach(cat=>vocabData[cat].forEach(w=>{ if(state.fav[w.en]) list.push(w); }));
+  } else {
+    list = vocabData[curCat]||[];
+  }
+  if(!list.length){
+    vocabDeck.innerHTML='<div class="muted">这里还没有收藏的单词，去卡片上点 ⭐ 收藏吧。</div>';
+    return;
+  }
+  list.forEach(w=>{
+    const st=state.wordStatus[w.en]||'';
+    const fav=!!state.fav[w.en];
+    const flip=document.createElement('div');
+    flip.className='flip';
+    flip.innerHTML=`
+      <div class="flip-inner">
+        <div class="face front">
+          <button class="star" data-star="1" title="收藏">${fav?'★':'☆'}</button>
+          ${st?`<span class="tag ${st==='m'?'m':'n'}">${st==='m'?'已掌握':'不会'}</span>`:''}
+          <div class="en-row"><div class="en">${w.en}</div><button class="speak" data-spk="en" title="朗读单词 / 句子">🔊</button></div>
+          ${w.ph?`<div class="ph">${w.ph}</div>`:''}
+          <div class="muted" style="font-size:12px">点击翻转看释义</div>
+        </div>
+        <div class="face back">
+          <div class="zh">${w.zh}</div>
+          <div class="ex">${w.ex}</div>
+          <div class="ex">${w.zhEx}</div>
+          <button class="speak" data-spk="ex" title="朗读例句">🔊 朗读例句</button>
+          <div class="card-actions">
+            <button class="btn sm ok" data-act="m">✓ 已掌握</button>
+            <button class="btn sm bad" data-act="n">✗ 不会</button>
+          </div>
+        </div>
+      </div>`;
+    flip.addEventListener('click',ev=>{
+      if(ev.target.closest('button'))return;
+      flip.classList.toggle('flipped');
+    });
+    flip.querySelector('[data-star="1"]').addEventListener('click',ev=>{
+      ev.stopPropagation();
+      if(state.fav[w.en]) delete state.fav[w.en]; else state.fav[w.en]=true;
+      save(); updateWrongBadge(); renderVocab();
+    });
+    flip.querySelector('[data-act="m"]').addEventListener('click',()=>{state.wordStatus[w.en]='m';markStudied();save();renderVocab();});
+    flip.querySelector('[data-act="n"]').addEventListener('click',()=>{state.wordStatus[w.en]='n';markStudied();save();renderVocab();});
+    const spkEn=flip.querySelector('[data-spk="en"]'); if(spkEn) spkEn.addEventListener('click',ev=>{ev.stopPropagation();speak(w.en);});
+    const spkEx=flip.querySelector('[data-spk="ex"]'); if(spkEx) spkEx.addEventListener('click',ev=>{ev.stopPropagation();speak(w.ex);});
+    vocabDeck.appendChild(flip);
+  });
+}
+renderVocab();
+
+/* ============ 情景对话 ============ */
+const sceneTabs=document.getElementById('sceneTabs');
+const dialogBox=document.getElementById('dialogBox');
+Object.keys(dialogues).forEach((sc,i)=>{
+  const s=document.createElement('div');
+  s.className='scene'+(i===0?' active':''); s.textContent=sc; s.dataset.sc=sc;
+  sceneTabs.appendChild(s);
+});
+sceneTabs.addEventListener('click',e=>{
+  const s=e.target.closest('.scene'); if(!s)return;
+  document.querySelectorAll('#sceneTabs .scene').forEach(x=>x.classList.remove('active'));
+  s.classList.add('active'); renderDialog(s.dataset.sc);
+});
+function renderDialog(sc){
+  dialogBox.innerHTML='';
+  dialogues[sc].forEach(line=>{
+    const d=document.createElement('div');
+    d.className='line';
+    d.innerHTML=`
+      <div class="who">${line.who}</div>
+      <div class="txt"><div class="en">${line.en}</div><div class="zh">${line.zh}</div></div>
+      <button class="speak" title="跟读">🔊</button>`;
+    d.querySelector('.en').addEventListener('click',()=>d.classList.toggle('show'));
+    d.querySelector('.zh').addEventListener('click',()=>d.classList.toggle('show'));
+    d.querySelector('.speak').addEventListener('click',()=>speak(line.en));
+    dialogBox.appendChild(d);
+  });
+  markStudied();
+}
+renderDialog(Object.keys(dialogues)[0]);
+
+/* ============ 听力填空 ============ */
+const realData = [
+  {en:"Emails are a big part of workplace communication.",zh:"邮件是职场沟通的重要部分。"},
+  {en:"I'm writing to follow up on our meeting yesterday.",zh:"我写这封邮件是为了跟进我们昨天的会议。"},
+  {en:"Let's go through the agenda before the meeting.",zh:"我们开会前先过一遍议程。"},
+  {en:"Our objective is to complete the project on time.",zh:"我们的目标是按时完成项目。"},
+  {en:"That meeting went well, and we agreed on the timeline.",zh:"会议开得不错，我们在时间线上达成了共识。"},
+  {en:"I have deadlines coming up this week.",zh:"我这周有截止日期要赶。"},
+  {en:"Deadlines can be stressful, but we manage them.",zh:"截止期限会让人有压力，但我们能应对。"},
+  {en:"Let's catch up after lunch to discuss the client.",zh:"我们午饭后碰一下，讨论客户的事。"},
+  {en:"Sophia did a great job on the presentation.",zh:"Sophia 的演示做得很好。"},
+  {en:"We should consider customer feedback before we decide.",zh:"做决定前我们应参考客户反馈。"},
+  {en:"Good teamwork is very important for success.",zh:"良好的团队合作对成功很重要。"},
+  {en:"I will finish the report and send it to you today.",zh:"我今天会完成报告并发给你。"},
+  {en:"This excavator has a 5-ton operating weight.",zh:"这台挖掘机操作重量是 5 吨。"},
+  {en:"The hydraulic cylinder lifts the boom and bucket.",zh:"液压缸举起动臂和铲斗。"},
+  {en:"Rubber tracks reduce damage to the ground.",zh:"橡胶履带减少对地面的损伤。"},
+  {en:"Welcome to our factory, let me show you the machines.",zh:"欢迎来到我们工厂，我带你看设备。"},
+  {en:"We can offer a volume discount for bulk orders.",zh:"大批量订单我们可以给量价折扣。"},
+  {en:"Lead time for this model is about fifteen days.",zh:"这款的交货周期大约 15 天。"}
+];
+const listenBox=document.getElementById('listenBox');
+let listenMode='fill';
+const listenActions=document.getElementById('listenActions');
+function renderListen(){
+  listenBox.innerHTML='';
+  if(listenMode==='real'){
+    listenActions.classList.add('hidden');
+    const hint=document.createElement('div');
+    hint.className='center muted'; hint.style.marginBottom='8px'; hint.style.fontSize='12px';
+    hint.textContent='点句子切换中英文，按 🔊 跟读（探厂 / 商务真实语料）';
+    listenBox.appendChild(hint);
+    realData.forEach(item=>{
+      const d=document.createElement('div');
+      d.className='line';
+      d.innerHTML=`
+        <div class="txt"><div class="en">${item.en}</div><div class="zh">${item.zh}</div></div>
+        <button class="speak" title="跟读">🔊</button>`;
+      d.querySelector('.en').addEventListener('click',()=>d.classList.toggle('show'));
+      d.querySelector('.zh').addEventListener('click',()=>d.classList.toggle('show'));
+      d.querySelector('.speak').addEventListener('click',()=>speak(item.en));
+      listenBox.appendChild(d);
+    });
+    markStudied();
+    return;
+  }
+  listenActions.classList.remove('hidden');
+  listenData.forEach((it,i)=>{
+    const html=it.sent.replace('___',`<input data-i="${i}" placeholder="填词">`);
+    const q=document.createElement('div');
+    q.className='fill-q';
+    q.innerHTML=`<div class="sent">${i+1}. ${html}</div><div class="fb" id="fb${i}"></div>`;
+    listenBox.appendChild(q);
+  });
+}
+renderListen();
+document.getElementById('listenTabs').addEventListener('click',e=>{
+  const s=e.target.closest('.scene'); if(!s)return;
+  document.querySelectorAll('#listenTabs .scene').forEach(x=>x.classList.remove('active'));
+  s.classList.add('active');
+  listenMode=s.dataset.mode;
+  renderListen();
+});
+document.getElementById('listenCheck').addEventListener('click',()=>{
+  let right=0;
+  listenData.forEach((it,i)=>{
+    const inp=listenBox.querySelector(`input[data-i="${i}"]`);
+    const fb=document.getElementById('fb'+i);
+    const v=(inp.value||'').trim().toLowerCase();
+    const ok=it.ans.some(a=>a.toLowerCase()===v);
+    fb.textContent=ok?('✓ 正确，答案：'+it.ans[0]):('✗ 正确答案：'+it.ans[0]);
+    fb.className='fb '+(ok?'ok':'bad');
+    if(ok)right++;
+  });
+  markStudied();
+  const tip=document.createElement('div');
+  tip.className='center muted'; tip.style.marginTop='8px';
+  tip.textContent=`本次答对 ${right} / ${listenData.length}`;
+  listenBox.appendChild(tip);
+});
+document.getElementById('listenReset').addEventListener('click',renderListen);
+
+/* ============ 小测验 ============ */
+const quizBox=document.getElementById('quizBox');
+let quizSel={};
+function renderQuiz(){
+  quizSel={}; quizBox.innerHTML='';
+  document.getElementById('quizSubmit').classList.remove('hidden');
+  document.getElementById('quizRetry').classList.add('hidden');
+  currentQuiz.forEach((it,i)=>{
+    const q=document.createElement('div'); q.className='q';
+    let opts=it.opt.map((o,j)=>`<button class="opt" data-q="${i}" data-o="${j}">${o}</button>`).join('');
+    q.innerHTML=`<div class="qt">${i+1}. ${it.q}</div>${opts}`;
+    quizBox.appendChild(q);
+  });
+  quizBox.querySelectorAll('.opt').forEach(b=>{
+    b.addEventListener('click',()=>{
+      const q=b.dataset.q;
+      quizBox.querySelectorAll(`.opt[data-q="${q}"]`).forEach(x=>x.classList.remove('sel'));
+      b.classList.add('sel'); quizSel[q]=+b.dataset.o;
+    });
+  });
+}
+renderQuiz();
+function recordWrong(it, sel){
+  const correct=it.opt[it.a];
+  const wrong = (sel==null||sel==undefined)?'(未作答)':(it.opt[sel]||'(未作答)');
+  const idx=state.wrongQuiz.findIndex(w=>w.q===it.q);
+  const entry={q:it.q, correct, wrong, ts:Date.now()};
+  if(idx>=0) state.wrongQuiz[idx]=entry; else state.wrongQuiz.push(entry);
+  save();
+}
+document.getElementById('quizSubmit').addEventListener('click',()=>{
+  let score=0;
+  currentQuiz.forEach((it,i)=>{
+    const sel=quizSel[i];
+    const opts=quizBox.querySelectorAll(`.opt[data-q="${i}"]`);
+    opts.forEach((o,j)=>{
+      o.disabled=true;
+      if(j===it.a)o.classList.add('right');
+      else if(j===sel)o.classList.add('wrong');
+    });
+    if(sel===it.a)score++; else recordWrong(it, sel);
+  });
+  const pct=Math.round(score/currentQuiz.length*100);
+  if(currentQuiz===baseQuiz){ state.quizScores.push(pct); if(state.quizScores.length>20)state.quizScores.shift(); }
+  markStudied(); save();
+  const r=document.createElement('div'); r.className='result';
+  r.innerHTML=`<div class="score">${pct} 分</div><div class="muted">答对 ${score} / ${currentQuiz.length} 题</div>`;
+  quizBox.appendChild(r);
+  document.getElementById('quizSubmit').classList.add('hidden');
+  document.getElementById('quizRetry').classList.remove('hidden');
+  renderHome(); updateWrongBadge();
+});
+document.getElementById('quizRetry').addEventListener('click',()=>{ currentQuiz=baseQuiz; renderQuiz(); });
+
+/* ============ 错题本 ============ */
+const wrongBox=document.getElementById('wrongBox');
+function renderWrong(){
+  wrongBox.innerHTML='';
+  updateWrongBadge();
+  if(!state.wrongQuiz.length){
+    wrongBox.innerHTML='<div class="muted center" style="padding:20px">🎉 暂无错题，测验全对或还没做过测验。</div>';
+    return;
+  }
+  state.wrongQuiz.forEach((w,i)=>{
+    const d=document.createElement('div'); d.className='q';
+    d.innerHTML=`<div class="qt">${i+1}. ${w.q}</div>
+      <div class="fb bad">你的答案：${w.wrong}</div>
+      <div class="fb ok">正确答案：${w.correct}</div>
+      <button class="btn sm bad" data-rm="${i}" style="margin-top:6px">移除</button>`;
+    wrongBox.appendChild(d);
+  });
+  wrongBox.querySelectorAll('[data-rm]').forEach(b=>b.addEventListener('click',()=>{
+    state.wrongQuiz.splice(+b.dataset.rm,1); save(); renderWrong();
+  }));
+}
+document.getElementById('wrongClear').addEventListener('click',()=>{
+  if(!state.wrongQuiz.length)return;
+  if(confirm('确定清空整个错题本？')){ state.wrongQuiz=[]; save(); renderWrong(); }
+});
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function wrongQuizToQuiz(){
+  const pool=baseQuiz.map(q=>q.opt[q.a]);
+  return state.wrongQuiz.map(w=>{
+    const distract=shuffle(pool.filter(x=>x!==w.correct)).slice(0,3);
+    const opt=shuffle([w.correct,...distract]);
+    return {q:w.q, opt, a:opt.indexOf(w.correct)};
+  });
+}
+document.getElementById('wrongRetry').addEventListener('click',()=>{
+  if(!state.wrongQuiz.length)return;
+  currentQuiz=wrongQuizToQuiz();
+  switchTab('quiz'); renderQuiz();
+});
+
+/* ============ CSV 导入 ============ */
+function splitCSVLine(line){
+  const out=[]; let cur=''; let q=false;
+  for(let i=0;i<line.length;i++){
+    const c=line[i];
+    if(c==='"'){ if(q&&line[i+1]==='"'){cur+='"';i++;} else q=!q; }
+    else if(c===','&&!q){ out.push(cur);cur=''; }
+    else cur+=c;
+  }
+  out.push(cur); return out;
+}
+function parseCSV(text){
+  const lines=text.split(/\r?\n/).filter(l=>l.trim());
+  if(!lines.length)return [];
+  const first=lines[0].toLowerCase();
+  let start=0;
+  if(first.includes('en')||first.includes('英文')||first.includes('分类')||first.includes('category')||first.includes('中文')) start=1;
+  const rows=[];
+  for(let i=start;i<lines.length;i++){
+    const cols=splitCSVLine(lines[i]);
+    if(cols.length<4)continue;
+    rows.push({cat:cols[0].trim(),en:cols[1].trim(),ph:cols[2].trim(),zh:cols[3].trim(),ex:(cols[4]||'').trim(),zhEx:(cols[5]||'').trim()});
+  }
+  return rows;
+}
+document.getElementById('csvImport').addEventListener('click',()=>{
+  const f=document.getElementById('csvFile').files[0];
+  const msg=document.getElementById('csvMsg');
+  if(!f){msg.textContent='⚠️ 请先选择一个 CSV 文件。';return;}
+  const reader=new FileReader();
+  reader.onload=()=>{
+    const rows=parseCSV(reader.result);
+    if(!rows.length){msg.textContent='⚠️ 没解析到有效数据，请检查格式。';return;}
+    state.imported=state.imported||[];
+    let added=0; const newCat=[];
+    rows.forEach(r=>{
+      const exists=state.imported.some(x=>x.cat===r.cat&&x.en.toLowerCase()===r.en.toLowerCase());
+      if(!exists){ state.imported.push(r); added++; if(!vocabData[r.cat])newCat.push(r.cat); }
+    });
+    state.imported.forEach(r=>{
+      vocabData[r.cat]=vocabData[r.cat]||[];
+      if(!vocabData[r.cat].some(w=>w.en.toLowerCase()===r.en.toLowerCase())) vocabData[r.cat].push(r);
+    });
+    save(); buildVocabChips();
+    msg.textContent=`✅ 成功导入 ${added} 个词${newCat.length?('，新增分类：'+[...new Set(newCat)].join('、')):''}。已自动保存，去「词汇卡」查看。`;
+    if(newCat.length){
+      vocabMode='cat'; curCat=[...new Set(newCat)][0];
+      switchTab('vocab'); renderVocab();
+      document.querySelectorAll('#vocabChips .chip').forEach(x=>x.classList.toggle('active',x.dataset.cat===curCat));
+    }
+  };
+  reader.readAsText(f,'UTF-8');
+});
+
+/* ============ 角色扮演（开放式 + 对话API） ============ */
+const rpTabs=document.getElementById('rpTabs');
+const rpBox=document.getElementById('rpBox');
+let rpState=null;
+function userRoleOf(sc){
+  const sp=dialogues[sc].map(l=>l.who);
+  const first=sp[0];
+  const other=[...new Set(sp)].find(x=>x!==first)||first;
+  return {partner:first, me:other};
+}
+function apiConfigured(){ return !!(state.api && state.api.apiKey); }
+Object.keys(dialogues).forEach((sc,i)=>{
+  const s=document.createElement('div');
+  s.className='scene'+(i===0?' active':''); s.textContent=sc; s.dataset.sc=sc;
+  rpTabs.appendChild(s);
+});
+rpTabs.addEventListener('click',e=>{
+  const s=e.target.closest('.scene'); if(!s)return;
+  document.querySelectorAll('#rpTabs .scene').forEach(x=>x.classList.remove('active'));
+  s.classList.add('active'); startRP(s.dataset.sc);
+});
+function startRP(sc){
+  const d=dialogues[sc];
+  const role=userRoleOf(sc);
+  rpState={sc, role, log:[{type:'partner', who:d[0].who, en:d[0].en, zh:d[0].zh}], mode: apiConfigured()?'api':'local', loading:false};
+  renderRP();
+}
+function rpFeedback(user,ref){
+  const stop=new Set(['the','a','an','to','of','and','is','are','for','with','on','in','i','you','we','it','this','that','please','my','your','from','will']);
+  const norm=s=>s.toLowerCase().replace(/[^a-z\s]/g,' ').split(/\s+/).filter(w=>w&&!stop.has(w));
+  const refW=norm(ref),uW=new Set(norm(user));
+  const hit=refW.filter(w=>uW.has(w));
+  if(!hit.length)return '试试用上更多商务英语关键词，对方会更容易接话～';
+  return '用到了关键词：'+hit.slice(0,6).join(', ');
+}
+async function callPartner(sc, userText){
+  const role=rpState.role;
+  const sys = state.api.system || `You are roleplaying as ${role.partner} in a business English conversation scenario: ${sc}. The user is playing ${role.me}. Reply in short, natural English (1-2 sentences) as ${role.partner}, staying in character. Do not break character. If the user writes in Chinese, gently ask them to use English.`;
+  const messages=[{role:'system',content:sys}];
+  rpState.log.forEach(it=>{
+    if(it.type==='partner') messages.push({role:'assistant',content:it.en});
+    else if(it.type==='user') messages.push({role:'user',content:it.en});
+  });
+  messages.push({role:'user',content:userText});
+  const url=state.api.baseURL.replace(/\/+$/,'')+'/chat/completions';
+  const res=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+state.api.apiKey},body:JSON.stringify({model:state.api.model, messages, temperature:0.7, max_tokens:140})});
+  if(!res.ok){ const t=await res.text().catch(()=> ''); throw new Error('API '+res.status+(t?(': '+t.slice(0,140)):'')); }
+  const j=await res.json();
+  return ((j.choices&&j.choices[0]&&j.choices[0].message&&j.choices[0].message.content)||'...').replace(/\n+/g,' ').trim();
+}
+async function rpSend(){
+  const ta=document.getElementById('rpInput'); if(!ta)return;
+  const v=ta.value.trim(); if(!v)return;
+  rpState.log.push({type:'user', en:v});
+  rpState.loading=true; renderRP();
+  let reply, isErr=false;
+  try{
+    if(rpState.mode==='api'){ reply=await callPartner(rpState.sc, v); }
+    else { reply=rpFeedback(v, v); }
+  }catch(e){ reply='⚠️ '+e.message; isErr=true; }
+  rpState.loading=false;
+  if(rpState.mode==='api'){
+    rpState.log.push({type:'partner', who:rpState.role.partner, en:reply, zh:''});
+  } else {
+    rpState.log.push({type:'note', en:reply});
+  }
+  renderRP();
+  if(rpState.mode==='api' && !isErr && reply && !reply.startsWith('⚠️')) speak(reply);
+  markStudied(); renderHome();
+}
+function renderRP(){
+  const d=dialogues[rpState.sc];
+  rpBox.innerHTML='';
+  const intro=document.createElement('div');
+  intro.className='muted';
+  intro.innerHTML=`你是 <b style="color:var(--blue)">${rpState.role.me}</b>，对方是 <b>${rpState.role.partner}</b>。${rpState.mode==='api'?'🤖 由对话API生成回复':'💡 本地关键词反馈模式（⚙️ 填写 API Key 可解锁 AI 自由对话）'}`;
+  rpBox.appendChild(intro);
+  const chat=document.createElement('div'); chat.className='rp-chat';
+  rpState.log.forEach(item=>{
+    const b=document.createElement('div');
+    if(item.type==='partner'){
+      b.className='bubble partner';
+      b.innerHTML=`<div class="who">${item.who}</div><div class="en">${item.en}</div>${item.zh?`<div class="zh">${item.zh}</div>`:''}<div class="speak" data-sp="1" style="margin-top:6px;display:inline-block;cursor:pointer">🔊</div>`;
+    } else if(item.type==='user'){
+      b.className='bubble user';
+      b.innerHTML=`<div class="en">${item.en}</div>`;
+    } else if(item.type==='note'){
+      b.className='bubble note';
+      b.innerHTML=`<div class="en">${item.en}</div>`;
+    }
+    chat.appendChild(b);
+  });
+  rpBox.appendChild(chat);
+  if(rpState.loading){
+    const t=document.createElement('div'); t.className='rp-typing'; t.textContent='对方输入中…'; rpBox.appendChild(t);
+  }
+  const wrap=document.createElement('div'); wrap.className='rp-input';
+  const micHtml = ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) ? `<button class="btn sm ghost" id="rpMic" title="语音输入">🎤</button>` : '';
+  wrap.innerHTML=`<textarea id="rpInput" rows="2" placeholder="用英语自由回复对方…（回车发送）"></textarea>
+    <button class="btn sm" id="rpSend">发送</button>${micHtml}`;
+  rpBox.appendChild(wrap);
+  const ta=document.getElementById('rpInput');
+  try{ ta.focus(); }catch(e){}
+  ta.addEventListener('keydown',e=>{ if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); rpSend(); } });
+  document.getElementById('rpSend').addEventListener('click',rpSend);
+  const sp=chat.querySelector('[data-sp="1"]');
+  if(sp) sp.addEventListener('click',()=>speak(sp.closest('.bubble').querySelector('.en').textContent));
+  const mic=document.getElementById('rpMic');
+  if(mic) mic.addEventListener('click',startDictation);
+}
+function startDictation(){
+  const Rec = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!Rec) return;
+  const r=new Rec(); r.lang='en-US'; r.interimResults=false; r.maxAlternatives=1;
+  r.onresult=ev=>{ const t=ev.results[0][0].transcript; const ta=document.getElementById('rpInput'); if(ta) ta.value=(ta.value?ta.value+' ':'')+t; };
+  try{ r.start(); }catch(e){}
+}
+try{startRP(Object.keys(dialogues)[0]);}catch(e){}
+
+/* ============ 设置面板 ============ */
+const settingsModal=document.getElementById('settingsModal');
+function openSettings(){
+  fillVoiceSel();
+  document.getElementById('rate').value=state.settings.rate;
+  document.getElementById('pitch').value=state.settings.pitch;
+  document.getElementById('rateVal').textContent=state.settings.rate.toFixed(2);
+  document.getElementById('pitchVal').textContent=state.settings.pitch.toFixed(2);
+  document.getElementById('apiBase').value=state.api.baseURL;
+  document.getElementById('apiKey').value=state.api.apiKey;
+  document.getElementById('apiModel').value=state.api.model;
+  document.getElementById('apiSys').value=state.api.system;
+  document.getElementById('apiTestMsg').textContent='';
+  settingsModal.classList.remove('hidden');
+}
+function closeSettings(){ settingsModal.classList.add('hidden'); }
+document.getElementById('gearBtn').addEventListener('click',openSettings);
+document.getElementById('setClose').addEventListener('click',closeSettings);
+settingsModal.addEventListener('click',e=>{ if(e.target===settingsModal) closeSettings(); });
+document.getElementById('rate').addEventListener('input',e=>{ document.getElementById('rateVal').textContent=(+e.target.value).toFixed(2); });
+document.getElementById('pitch').addEventListener('input',e=>{ document.getElementById('pitchVal').textContent=(+e.target.value).toFixed(2); });
+document.getElementById('voiceTest').addEventListener('click',()=>{
+  const sel=document.getElementById('voiceSel');
+  const s={rate:+(document.getElementById('rate').value), pitch:+(document.getElementById('pitch').value), voiceURI:sel.value};
+  const old=state.settings; state.settings=s;
+  speak("Hello, this is a natural American English voice for your business English practice.");
+  state.settings=old;
+});
+document.getElementById('apiTest').addEventListener('click',async()=>{
+  const msg=document.getElementById('apiTestMsg');
+  const base=document.getElementById('apiBase').value.trim();
+  const key=document.getElementById('apiKey').value.trim();
+  const model=document.getElementById('apiModel').value.trim()||'deepseek-chat';
+  if(!key){ msg.textContent='⚠️ 请先填写 API Key。'; return; }
+  msg.textContent='连接测试中…';
+  try{
+    const res=await fetch(base.replace(/\/+$/,'')+'/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},body:JSON.stringify({model, messages:[{role:'user',content:'Say hi in one word.'}], max_tokens:20})});
+    if(!res.ok){ const t=await res.text().catch(()=> ''); throw new Error('API '+res.status+(t?(': '+t.slice(0,120)):'')); }
+    msg.textContent='✅ 连接成功，可以开始开放式角色扮演了。';
+  }catch(e){ msg.textContent='⚠️ '+e.message+'（浏览器直连可能因 CORS 被拦，可换 OpenRouter 等支持跨域的服务）'; }
+});
+document.getElementById('setSave').addEventListener('click',()=>{
+  const sel=document.getElementById('voiceSel');
+  state.settings={rate:+(document.getElementById('rate').value), pitch:+(document.getElementById('pitch').value), voiceURI:sel.value};
+  state.api={
+    baseURL:document.getElementById('apiBase').value.trim(),
+    apiKey:document.getElementById('apiKey').value.trim(),
+    model:document.getElementById('apiModel').value.trim()||'deepseek-chat',
+    system:document.getElementById('apiSys').value.trim()
+  };
+  save(); closeSettings();
+  // 若角色扮演已打开，刷新模式
+  if(rpState){ rpState.mode=apiConfigured()?'api':'local'; renderRP(); }
+});
+
+/* 初始化首页 */
+renderHome();
+updateWrongBadge();
+
+/* ============ PWA 安装到桌面（仅 https/localhost 生效） ============ */
+if('serviceWorker' in navigator && /^(https?:)?\/\//.test(location.href) && !location.protocol.startsWith('file')){
+  window.addEventListener('load',()=>{
+    navigator.serviceWorker.register('sw.js').catch(()=>{});
+  });
+}
+</script>
+</body>
+</html>
